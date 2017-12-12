@@ -7,7 +7,9 @@ import com.mentoring.controller.dto.Response;
 import com.mentoring.controller.dto.user.GenericUserDto;
 import com.mentoring.controller.dto.user.RegistrationDto;
 import com.mentoring.controller.exception.DuplicateEmailException;
+import com.mentoring.domain.entity.Role;
 import com.mentoring.domain.entity.User;
+import com.mentoring.service.RoleService;
 import com.mentoring.service.UserService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +33,9 @@ public class UserController {
     private UserService userService;
 
     @Autowired
+    private RoleService roleService;
+
+    @Autowired
     private Converter<User, GenericUserDto> userConverter;
 
     @PostMapping(value = "/register", consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -42,6 +47,7 @@ public class UserController {
             throw new DuplicateEmailException("Email is already exists");
         }
         final User user = userConverter.convertToEntity(registrationDto);
+        user.addRole(roleService.findByRoleName(Role.USER));
         userService.save(user);
 
         return new Response(HttpStatus.CREATED, "User is created");
